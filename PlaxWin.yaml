@@ -1,0 +1,68 @@
+name: Windows RDP Bore Tunnel
+
+on:
+  workflow_dispatch:
+
+jobs:
+  secure-rdp:
+    runs-on: windows-2025
+    timeout-minutes: 3600
+    
+    steps:
+      - name: Enable RDP
+        run: |
+          Set-ItemProperty -Path 'HKLM:\System\CurrentControlSet\Control\Terminal Server' -Name "fDenyTSConnections" -Value 0 -Force
+          netsh advfirewall firewall add rule name="RDP" dir=in action=allow protocol=TCP localport=3389
+          net user runneradmin "admin@123"
+
+      - name: Download Bore
+        shell: bash
+        run: |
+          # Direct download from provided link
+          BORE_URL="https://github.com/ekzhang/bore/releases/download/v0.6.0/bore-v0.6.0-x86_64-pc-windows-msvc.zip"
+          curl -L -o bore.zip "$BORE_URL"
+          unzip -o bore.zip
+          ls -la
+          echo "BORE_EXE=$(pwd)/bore.exe" >> $GITHUB_ENV
+
+      - name: Start Bore Tunnel for RDP
+        shell: bash
+        run: |
+          echo "Starting Bore TCP tunnel on port 3389..."
+          # Create a TCP tunnel: local port 3389 -> bore.pub random port
+          "$BORE_EXE" local 3389 --to bore.pub --port 0 > tunnel.log 2>&1 &
+          BORE_PID=$!
+          sleep 10
+
+          echo "=== Tunnel Log Output ==="
+          cat tunnel.log
+          echo "=== End of Log ==="
+
+          # Extract the assigned public address and port
+          # bore log contains lines like:
+          # "listening at bore.pub:12345" or "tcp://bore.pub:12345"
+          # We'll try to capture the address with port
+          address=$(grep -oP '(?:listening at|tcp://)\s*\K[^ ]+' tunnel.log | head -1)
+          if [ -n "$address" ]; then
+            # If address is just a port number, prepend bore.pub
+            if [[ "$address" =~ ^[0-9]+$ ]]; then
+              hostPort="bore.pub:$address"
+            else
+              hostPort="$address"
+            fi
+            echo "========================================="
+            echo "RDP Address: $hostPort"
+            echo "RDP User: runneradmin"
+            echo "RDP Pass: admin@123"
+            echo "========================================="
+          else
+            echo "Could not auto-detect address. Check the log above."
+            echo "You can also check the full tunnel.log for the address."
+            # Don't exit; keep alive
+          fi
+
+          # Keep the runner alive
+          while true; do
+            echo "[$(date)] RDP Active via Bore"
+            sleep 300
+          done
