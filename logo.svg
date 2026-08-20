@@ -1,0 +1,26 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 200" width="200" height="200">
+  <!-- Background rounded square -->
+  <rect x="10" y="10" width="180" height="180" rx="30" fill="#1E293B" />
+  
+  <!-- Window frame -->
+  <rect x="40" y="40" width="120" height="90" rx="12" fill="#2D3748" />
+  
+  <!-- Window panes -->
+  <line x1="100" y1="40" x2="100" y2="130" stroke="#1E293B" stroke-width="6" />
+  <line x1="40" y1="85" x2="160" y2="85" stroke="#1E293B" stroke-width="6" />
+  
+  <!-- Letter P integrated in left top pane -->
+  <text x="70" y="70" font-family="Arial, sans-serif" font-size="36" font-weight="bold" fill="#34D399">P</text>
+
+  <!-- Tunnel representation at bottom -->
+  <rect x="50" y="140" width="100" height="14" rx="7" fill="#34D399" opacity="0.9" />
+  <rect x="70" y="150" width="60" height="8" rx="4" fill="#10B981" />
+  
+  <!-- Connection dots -->
+  <circle cx="80" cy="165" r="4" fill="#34D399" />
+  <circle cx="100" cy="165" r="4" fill="#34D399" />
+  <circle cx="120" cy="165" r="4" fill="#34D399" />
+  
+  <!-- Text label -->
+  <text x="100" y="190" font-family="Arial, sans-serif" font-size="18" font-weight="bold" fill="white" text-anchor="middle">PlixWin</text>
+</svg>
